@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 
 namespace CrudApp
@@ -208,13 +209,34 @@ namespace CrudApp
         {
             List<string> validationMessages = new List<string>();
 
+            // Couple of points
+            //
+            // I'm aware this regex gets built every time this method is called.
+            // If done properly I would pull this validation code out into a validator type class or namespace
+            // and have this regex compiled statically.
+            // As it stands, this keeps the regex close to where it is used.
+            //
+            // I'm also aware validating email addresses by regex is a fools errand and the following regex
+            // would allow multiple invalid email addresses to be entered. I see a regex like below as
+            // being used to help prevent basic typos and nothing more.
+            Regex re = new Regex(@"^.+\@.+\..+$");
+
+
             if(string.IsNullOrWhiteSpace(emailAddress))
             {
+                // I'm aware this condition will never be "hit" in my program as it stands.
+                // This condition is around because its correct for the methods purpose.
+                // if I needed to modify this project and I suddenly needed to validate email addresses in a diffent context
+                // then calling this method would produce expected results. As in empty strings are not valid email addressed.
                 validationMessages.Add("Email address cannot be empty or just whitespace.");
             }
             else if(emailAddresses.FindIndex(x => x.Equals(emailAddress, StringComparison.OrdinalIgnoreCase)) != -1)
             {
                 validationMessages.Add("Entered email address is a duplicate of one already in the database");
+            }
+            else if(!re.IsMatch(emailAddress))
+            {
+                validationMessages.Add("Invalid email format. Should look like example@example.com");
             }
 
             return validationMessages;
