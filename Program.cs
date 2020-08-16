@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.IO;
 
 namespace CrudApp
 {
@@ -54,6 +55,16 @@ namespace CrudApp
 
                         case "clear":
                             Clear(emailAddresses);
+                            action = string.Empty;
+                            break;
+
+                        case "import":
+                            Import(emailAddresses);
+                            action = string.Empty;
+                            break;
+
+                        case "export":
+                            Export(emailAddresses);
                             action = string.Empty;
                             break;
 
@@ -345,6 +356,46 @@ namespace CrudApp
         {
             emailAddresses.Clear();
             Console.WriteLine("All email addresses removed.");
+        }
+
+
+        static void Import(List<string> emailAddresses)
+        {
+        }
+
+
+
+        static void Export(List<string> emailAddresses)
+        {
+            if(emailAddresses.Count > 0)
+            {
+                Console.Write("Name of the file to save to? ");
+                string fileName = Console.ReadLine();
+
+                if(!string.IsNullOrWhiteSpace(fileName))
+                {
+                    try
+                    {
+                        File.WriteAllText(
+                            Path.Join(Directory.GetCurrentDirectory(), fileName),
+                            string.Join('\n', emailAddresses)
+                        );
+                        Console.WriteLine("Exported successful!");
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine($"Could not export email address list. {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Export cancelled.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("No email addresses to export.");
+            }
         }
     }
 }
