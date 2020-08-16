@@ -52,6 +52,7 @@ namespace CrudApp
                             break;
 
                         case "clear":
+                            Clear(emailAddresses);
                             action = string.Empty;
                             break;
 
@@ -312,6 +313,16 @@ namespace CrudApp
 
                 Console.WriteLine($"{oldEmailAddress} deleted.");
             }
+        }
+
+        /// <summary>
+        /// Starts fresh with the dataset
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses.</param>
+        static void Clear(List<string> emailAddresses)
+        {
+            emailAddresses.Clear();
+            Console.WriteLine("All email addresses removed.");
         }
     }
 }
