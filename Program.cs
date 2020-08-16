@@ -37,6 +37,7 @@ namespace CrudApp
                             break;
 
                         case "add":
+                            Add(emailAddresses);
                             action = string.Empty;
                             break;
 
@@ -97,11 +98,83 @@ namespace CrudApp
             } while(!quit);
         }
 
+        /// <summary>
+        /// Gets an action the user from the menu.
+        /// </summary>
+        /// <remarks>
+        /// It is expected that the action returned from the user could be invalid. It is up to the
+        /// menu to ensure invalid actions are handled gracefully.
+        /// </remarks>
+        /// <returns>The action collected from the user.</returns>
         static string GetAction()
         {
             Console.Write("Select an action: ");
             return Console.ReadLine().ToLower().Trim();
         }
+
+        /// <summary>
+        /// Gets a valid email address as input from the user.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses to search for duplicate entries.</param>
+        /// <returns>A valid email address from the user or string.empty when the user quits entering.</returns>
+        static string GetEmailAddress(string message, List<string> emailAddresses)
+        {
+            string newEmailAddress;
+            IList<string> validationMessages;
+            bool done = false;
+            do
+            {
+                Console.Write(message);
+                newEmailAddress = Console.ReadLine();
+
+                if(newEmailAddress == string.Empty)
+                {
+                    done = true;
+                }
+                else
+                {
+                    validationMessages = ValidateEmailAddress(newEmailAddress, emailAddresses);
+
+                    if(validationMessages.Count > 0)
+                    {
+                        Console.WriteLine("Entered Email Address is invalid: ");
+                        foreach(string errorMessage in validationMessages)
+                        {
+                            Console.WriteLine($"  - {errorMessage}");
+                        }
+                    }
+                    else
+                    {
+                        done = true;
+                    }
+                }
+            }
+            while(!done);
+            return newEmailAddress;
+        }
+
+        /// <summary>
+        /// Validates the given email address is a proper email address and that it's not a duplicated entry.
+        /// </summary>
+        /// <param name="emailAddress">The email add to validate</param>
+        /// <param name="emailAddresses">List of addresses used to determine if the given address is a duplicate.</param>
+        /// <returns>Returns a list of validation error messages if any are found.</returns>
+        static IList<string> ValidateEmailAddress(string emailAddress, List<string> emailAddresses)
+        {
+            List<string> validationMessages = new List<string>();
+
+            if(string.IsNullOrWhiteSpace(emailAddress))
+            {
+                validationMessages.Add("Email address cannot be empty or just whitespace.");
+            }
+            else if(emailAddresses.FindIndex(x => x.Equals(emailAddress, StringComparison.OrdinalIgnoreCase)) != -1)
+            {
+                validationMessages.Add("Entered email address is a duplicate of one already in the database");
+            }
+
+            return validationMessages;
+        }
+
         /// <summary>
         /// Displays all of the email addresses in the console for the user to see.
         /// </summary>
@@ -117,6 +190,30 @@ namespace CrudApp
             }
         }
 
+        /// <summary>
+        /// Adds an email address to the list of email addresses.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses</param>
+        static void Add(List<string> emailAddresses)
+        {
+            string emailAddress;
+            bool done = false;
 
+            Console.WriteLine("Add new email addresses to the database. Press enter on an empty line when finshed.");
+            do
+            {
+                emailAddress = GetEmailAddress("Enter a new email address: ", emailAddresses);
+
+                if(string.IsNullOrEmpty(emailAddress))
+                {
+                    done = true;
+                }
+                else
+                {
+                    emailAddresses.Add(emailAddress);
+                }
+
+            } while(!done);
+        }
     }
 }
