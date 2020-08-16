@@ -359,12 +359,65 @@ namespace CrudApp
         }
 
 
+        /// <summary>
+        /// Allows the user to import data into our running dataset from the file system.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses.</param>
         static void Import(List<string> emailAddresses)
         {
+            // Citation
+            // https://docs.microsoft.com/en-us/dotnet/api/system.stringcomparer?view=netcore-3.1
+            // Had to look up StringComparer as I needed something that Implemented IEqualityComparer so I could
+            // compare string while ignoring case.
+
+            Console.Write("Name of the file to read from? ");
+            string fileName = Console.ReadLine();
+
+            if(!string.IsNullOrWhiteSpace(fileName))
+            {
+                try
+                {
+                    // Import lines
+                    IEnumerable<string> lines = File.ReadLines(Path.Join(Directory.GetCurrentDirectory(), fileName));
+                    foreach(string line in lines)
+                    {
+                        emailAddresses.Add(line.Trim());
+                    }
+
+                    // De-dup the dataset
+                    var distinctAddresses = emailAddresses.Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+                    // Super duper not efficient but we create a new list object from the de-duped dataset.
+                    // We do this because of linqs data bindings to the emailAddresses object.
+                    // If we try to clear emailAddresses without storing another copy
+                    // then we lose all of our data.
+                    distinctAddresses = new List<string>(distinctAddresses);
+
+                    // We clear our datastore
+                    emailAddresses.Clear();
+
+                    // We the repopulate it with our de-duped entries.
+                    emailAddresses.AddRange(distinctAddresses);
+
+                    Console.WriteLine("Import successful!");
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Could not import email address list. {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Import cancelled.");
+            }
+
         }
 
 
-
+        /// <summary>
+        /// Allows the user to export the dataset to the filesystem.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses.</param>
         static void Export(List<string> emailAddresses)
         {
             if(emailAddresses.Count > 0)
