@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +6,15 @@ namespace CrudApp
 {
     class Program
     {
+        /*
+            Title: C# Introduction Assignment – CRUD
+            Purpose: An application that accepts user supplied email address. The user can then List, Add, Edit & Delete the emails
+                     in the list.
+
+            Author: Aaron Barthel
+            Last Modified: 08/16/2020
+        */
+
         static void Main()
         {
             bool quit = false;
