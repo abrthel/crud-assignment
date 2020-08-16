@@ -288,12 +288,19 @@ namespace CrudApp
         /// <param name="emailAddresses">List of email addresses to display.</param>
         static void List(List<string> emailAddresses)
         {
-            Console.WriteLine("Email Addresses: ");
-            int count = 1;
-            foreach(string emailAddress in emailAddresses)
+            if(emailAddresses.Count > 0)
             {
-                Console.WriteLine($"{count}. {emailAddress}");
-                count++;
+                Console.WriteLine("Email Addresses: ");
+                int count = 1;
+                foreach(string emailAddress in emailAddresses)
+                {
+                    Console.WriteLine($"{count}. {emailAddress}");
+                    count++;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Email address list is empty. Nothing to display.");
             }
         }
 
@@ -333,30 +340,36 @@ namespace CrudApp
         static void Edit(List<string> emailAddresses)
         {
             Console.WriteLine("Edit an entry by selecting either the entry or its index number.\nTo cancel press enter on the entry selection screen.");
-
-            int addressIndex = GetEmailAddressIndex(emailAddresses);
-
-            if(addressIndex == -1)
+            if(emailAddresses.Count > 0)
             {
-                Console.WriteLine("Canceling edit..");
-            }
-            else
-            {
-                string oldEmailAddress = emailAddresses[addressIndex];
-                string newEmailAddress = GetEmailAddress($"Replace {oldEmailAddress} with? ", emailAddresses);
+                int addressIndex = GetEmailAddressIndex(emailAddresses);
 
-                if(string.IsNullOrEmpty(newEmailAddress))
+                if(addressIndex == -1)
                 {
-                    Console.WriteLine("Edit cancelled.");
+                    Console.WriteLine("Canceling edit..");
                 }
                 else
                 {
-                    emailAddresses[addressIndex] = newEmailAddress;
+                    string oldEmailAddress = emailAddresses[addressIndex];
+                    string newEmailAddress = GetEmailAddress($"Replace {oldEmailAddress} with? ", emailAddresses);
 
-                    // Action modified the dataset. Sort it
-                    SortDataset(emailAddresses);
-                    Console.WriteLine($"{oldEmailAddress} has been replaced with {newEmailAddress}.");
+                    if(string.IsNullOrEmpty(newEmailAddress))
+                    {
+                        Console.WriteLine("Edit cancelled.");
+                    }
+                    else
+                    {
+                        emailAddresses[addressIndex] = newEmailAddress;
+
+                        // Action modified the dataset. Sort it
+                        SortDataset(emailAddresses);
+                        Console.WriteLine($"{oldEmailAddress} has been replaced with {newEmailAddress}.");
+                    }
                 }
+            }
+            else
+            {
+                Console.WriteLine("Email address list is already empty. Skipping...");
             }
         }
 
@@ -367,22 +380,29 @@ namespace CrudApp
         static void Remove(List<string> emailAddresses)
         {
             Console.WriteLine("Delete an entry by selecting either the entry or its index number.\nTo cancel press enter on the entry selection screen.");
+             if(emailAddresses.Count > 0)
+             {
+                int addressIndex = GetEmailAddressIndex(emailAddresses);
 
-            int addressIndex = GetEmailAddressIndex(emailAddresses);
+                if(addressIndex == -1)
+                {
+                    Console.WriteLine("Delete cancelled.");
+                }
+                else
+                {
+                    string oldEmailAddress = emailAddresses[addressIndex];
+                    emailAddresses.RemoveAt(addressIndex);
 
-            if(addressIndex == -1)
-            {
-                Console.WriteLine("Delete cancelled.");
-            }
-            else
-            {
-                string oldEmailAddress = emailAddresses[addressIndex];
-                emailAddresses.RemoveAt(addressIndex);
+                    // Action modified the dataset. Sort it
+                    SortDataset(emailAddresses);
+                    Console.WriteLine($"{oldEmailAddress} deleted.");
+                }
+             }
+             else
+             {
+                 Console.WriteLine("Email address list is already empty. Skipping...");
+             }
 
-                // Action modified the dataset. Sort it
-                SortDataset(emailAddresses);
-                Console.WriteLine($"{oldEmailAddress} deleted.");
-            }
         }
 
         /// <summary>
@@ -391,8 +411,15 @@ namespace CrudApp
         /// <param name="emailAddresses">List of email addresses.</param>
         static void Clear(List<string> emailAddresses)
         {
-            emailAddresses.Clear();
-            Console.WriteLine("All email addresses removed.");
+            if(emailAddresses.Count > 0)
+            {
+                emailAddresses.Clear();
+                Console.WriteLine("All email addresses removed.");
+            }
+            else
+            {
+                Console.WriteLine("Email address list is already empty. Skipping...");
+            }
         }
 
 
@@ -416,30 +443,37 @@ namespace CrudApp
                 {
                     // Import lines
                     IEnumerable<string> lines = File.ReadLines(Path.Join(Directory.GetCurrentDirectory(), fileName));
-                    foreach(string line in lines)
+                    if(lines.Count() > 0)
                     {
-                        emailAddresses.Add(line.Trim());
+                        foreach(string line in lines)
+                        {
+                            emailAddresses.Add(line.Trim());
+                        }
+
+                        // De-dup the dataset
+                        var distinctAddresses = emailAddresses.Distinct(StringComparer.InvariantCultureIgnoreCase);
+
+                        // Super duper not efficient but we create a new list object from the de-duped dataset.
+                        // We do this because of linqs data bindings to the emailAddresses object.
+                        // If we try to clear emailAddresses without storing another copy
+                        // then we lose all of our data.
+                        distinctAddresses = new List<string>(distinctAddresses);
+
+                        // We clear our datastore
+                        emailAddresses.Clear();
+
+                        // We the repopulate it with our de-duped entries.
+                        emailAddresses.AddRange(distinctAddresses);
+
+                        // Action modified the dataset. Sort it
+                        SortDataset(emailAddresses);
+
+                        Console.WriteLine("Import successful!");
                     }
-
-                    // De-dup the dataset
-                    var distinctAddresses = emailAddresses.Distinct(StringComparer.InvariantCultureIgnoreCase);
-
-                    // Super duper not efficient but we create a new list object from the de-duped dataset.
-                    // We do this because of linqs data bindings to the emailAddresses object.
-                    // If we try to clear emailAddresses without storing another copy
-                    // then we lose all of our data.
-                    distinctAddresses = new List<string>(distinctAddresses);
-
-                    // We clear our datastore
-                    emailAddresses.Clear();
-
-                    // We the repopulate it with our de-duped entries.
-                    emailAddresses.AddRange(distinctAddresses);
-
-                    // Action modified the dataset. Sort it
-                    SortDataset(emailAddresses);
-
-                    Console.WriteLine("Import successful!");
+                    else
+                    {
+                        Console.WriteLine("No email address to import... Import cancelled.");
+                    }
                 }
                 catch(Exception ex)
                 {
