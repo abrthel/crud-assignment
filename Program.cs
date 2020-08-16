@@ -20,10 +20,17 @@ namespace CrudApp
         static void Main()
         {
             bool quit = false;
-            List<string> emailAddresses = new List<string> {
+            List<string> emailAddresses = new List<string>();
+
+            // Added for quick testing
+            // Comment out if not needed.
+            string[] testAddresses = new string[] {
                 "aaron@live.ca", "marshal@live.ca", "tina@outlook.com", "shawna@live.ca", "justin@outlook.com", "marcus@gmail.com",
                 "abby@msn.com", "jim@yahoo.com", "martin@live.ca", "fay@live.ca"
             };
+            emailAddresses.AddRange(testAddresses);
+            SortDataset(emailAddresses);
+
 
             Console.WriteLine("Type an action name or 'help' for more information. 'q' to quit.\n\n");
             string action = GetAction();
@@ -127,6 +134,11 @@ namespace CrudApp
             return Console.ReadLine().ToLower().Trim();
         }
 
+        /// <summary>
+        /// Gets the index for an email from the dataset
+        /// </summary>
+        /// <param name="emailAddresses"></param>
+        /// <returns>Returns the index or -1 if an index could not be found.</returns>
         static int GetEmailAddressIndex(List<string> emailAddresses)
         {
             int index;
@@ -159,7 +171,7 @@ namespace CrudApp
                 }
                 else
                 {
-                    // User entered empty string which is our error condition.
+                    // User entered empty string which is our quit condition.
                     index = -1;
                     done = true;
                 }
@@ -254,6 +266,15 @@ namespace CrudApp
         }
 
         /// <summary>
+        /// Sorts the dataset
+        /// </summary>
+        /// <param name="emailAddress">List of email addresses.</param>
+        static void SortDataset(List<string> emailAddress)
+        {
+            emailAddress.Sort();
+        }
+
+        /// <summary>
         /// Displays all of the email addresses in the console for the user to see.
         /// </summary>
         /// <param name="emailAddresses">List of email addresses to display.</param>
@@ -292,6 +313,9 @@ namespace CrudApp
                 }
 
             } while(!done);
+
+            // Action could have modified the dataset. Sort it
+            SortDataset(emailAddresses);
         }
 
         /// <summary>
@@ -320,6 +344,9 @@ namespace CrudApp
                 else
                 {
                     emailAddresses[addressIndex] = newEmailAddress;
+
+                    // Action modified the dataset. Sort it
+                    SortDataset(emailAddresses);
                     Console.WriteLine($"{oldEmailAddress} has been replaced with {newEmailAddress}.");
                 }
             }
@@ -344,6 +371,8 @@ namespace CrudApp
                 string oldEmailAddress = emailAddresses[addressIndex];
                 emailAddresses.RemoveAt(addressIndex);
 
+                // Action modified the dataset. Sort it
+                SortDataset(emailAddresses);
                 Console.WriteLine($"{oldEmailAddress} deleted.");
             }
         }
@@ -398,6 +427,9 @@ namespace CrudApp
 
                     // We the repopulate it with our de-duped entries.
                     emailAddresses.AddRange(distinctAddresses);
+
+                    // Action modified the dataset. Sort it
+                    SortDataset(emailAddresses);
 
                     Console.WriteLine("Import successful!");
                 }
