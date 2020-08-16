@@ -75,6 +75,11 @@ namespace CrudApp
                             action = string.Empty;
                             break;
 
+                        case "search":
+                            SearchByDomain(emailAddresses);
+                            action = string.Empty;
+                            break;
+
                         case "quit":
                         case "q":
                             quit = true;
@@ -87,13 +92,16 @@ namespace CrudApp
                             Console.WriteLine(string.Join(Environment.NewLine, new string[] {
                                 "+====== Help Menu ======+",
                                 "Select an action from the list below or type 'q' or 'quit' to quit the program.",
-                                "list   - Lists all of the email addresses",
-                                "add    - Adds a new email address",
-                                "edit   - Updates an email address",
-                                "remove - Removes an email address",
-                                "clear  - Removes all email addresses",
-                                "quit   - Quits the program",
-                                "help   - Displays this window",
+                                "list    - Lists all of the email addresses",
+                                "add     - Adds a new email address",
+                                "edit    - Updates an email address",
+                                "remove  - Removes an email address",
+                                "clear   - Removes all email addresses",
+                                "import  - Imports and merges email addresses from a file",
+                                "export  - Saves email addresses to a file",
+                                "search  - Returns all email address matching a given domain",
+                                "quit    - Quits the program",
+                                "help    - Displays this window",
                             }));
                             action = string.Empty;
                             break;
@@ -400,7 +408,7 @@ namespace CrudApp
             // compare string while ignoring case.
 
             Console.Write("Name of the file to read from? ");
-            string fileName = Console.ReadLine();
+            string fileName = Console.ReadLine().Trim();
 
             if(!string.IsNullOrWhiteSpace(fileName))
             {
@@ -455,7 +463,7 @@ namespace CrudApp
             if(emailAddresses.Count > 0)
             {
                 Console.Write("Name of the file to save to? ");
-                string fileName = Console.ReadLine();
+                string fileName = Console.ReadLine().Trim();
 
                 if(!string.IsNullOrWhiteSpace(fileName))
                 {
@@ -481,6 +489,42 @@ namespace CrudApp
             {
                 Console.WriteLine("No email addresses to export.");
             }
+        }
+
+        /// <summary>
+        /// Searches the email addresses by an entered domain.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses.</param>
+        static void SearchByDomain(List<string> emailAddresses)
+        {
+            Console.Write("Enter a domain to search for: ");
+            string domain = Console.ReadLine().Trim();
+
+            if(!string.IsNullOrWhiteSpace(domain))
+            {
+                var matches = emailAddresses.Where((address, index) => {
+                    string emailAddressDomain = address.Substring(address.IndexOf('@')+1);
+                   return emailAddressDomain.Equals(domain, StringComparison.OrdinalIgnoreCase);
+                });
+
+                if (matches.Count() > 0)
+                {
+                    foreach(string match in matches)
+                    {
+                        int index = emailAddresses.FindIndex(x => x.Equals(match, StringComparison.OrdinalIgnoreCase));
+                        Console.WriteLine($"{index}. {match}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No matches found..");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Search cancelled..");
+            }
+
         }
     }
 }
