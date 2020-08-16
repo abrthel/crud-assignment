@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,6 +42,7 @@ namespace CrudApp
                             break;
 
                         case "edit":
+                            Edit(emailAddresses);
                             action = string.Empty;
                             break;
 
@@ -112,6 +113,48 @@ namespace CrudApp
             return Console.ReadLine().ToLower().Trim();
         }
 
+        static int GetEmailAddressIndex(List<string> emailAddresses)
+        {
+            int index;
+            bool done = false;
+
+            do
+            {
+                Console.Write("Make a selection: ");
+                string input = Console.ReadLine().Trim();;
+
+                if(!string.IsNullOrEmpty(input))
+                {
+                    bool isValidInt = int.TryParse(input, out index);
+                    if(isValidInt)
+                    {
+                        index--; // Displayed indexs are off by one; this corrects that error.
+                        done = true;
+                    }
+                    else
+                    {
+                        index = emailAddresses.FindIndex(x => x.Equals(input, StringComparison.OrdinalIgnoreCase));
+                        done = true;
+                    }
+
+                    if(index < 0 || index >= emailAddresses.Count)
+                    {
+                        done = false;
+                        Console.WriteLine("Invalid email address selection. Enter the number or full text of the address.");
+                    }
+                }
+                else
+                {
+                    // User entered empty string which is our error condition.
+                    index = -1;
+                    done = true;
+                }
+            } while(!done);
+
+            return index;
+        }
+
+
         /// <summary>
         /// Gets a valid email address as input from the user.
         /// </summary>
@@ -125,7 +168,7 @@ namespace CrudApp
             do
             {
                 Console.Write(message);
-                newEmailAddress = Console.ReadLine();
+                newEmailAddress = Console.ReadLine().Trim();
 
                 if(newEmailAddress == string.Empty)
                 {
@@ -214,6 +257,33 @@ namespace CrudApp
                 }
 
             } while(!done);
+        }
+
+        static void Edit(List<string> emailAddresses)
+        {
+            Console.WriteLine("Edit an entry by selecting either the entry or its index number.\nTo cancel press enter on the entry selection screen.");
+
+            int addressIndex = GetEmailAddressIndex(emailAddresses);
+
+            if(addressIndex == -1)
+            {
+                Console.WriteLine("Canceling edit..");
+            }
+            else
+            {
+                string oldEmailAddress = emailAddresses[addressIndex];
+                string newEmailAddress = GetEmailAddress($"Replace {oldEmailAddress} with? ", emailAddresses);
+
+                if(string.IsNullOrEmpty(newEmailAddress))
+                {
+                    Console.WriteLine("Canceling edit..");
+                }
+                else
+                {
+                    emailAddresses[addressIndex] = newEmailAddress;
+                    Console.WriteLine($"{oldEmailAddress} has been replaced with {newEmailAddress}.");
+                }
+            }
         }
     }
 }
