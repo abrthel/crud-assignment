@@ -47,6 +47,7 @@ namespace CrudApp
                             break;
 
                         case "remove":
+                            Remove(emailAddresses);
                             action = string.Empty;
                             break;
 
@@ -259,6 +260,10 @@ namespace CrudApp
             } while(!done);
         }
 
+        /// <summary>
+        /// Allows the user to edit an email address in the dataset
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses</param>
         static void Edit(List<string> emailAddresses)
         {
             Console.WriteLine("Edit an entry by selecting either the entry or its index number.\nTo cancel press enter on the entry selection screen.");
@@ -276,13 +281,36 @@ namespace CrudApp
 
                 if(string.IsNullOrEmpty(newEmailAddress))
                 {
-                    Console.WriteLine("Canceling edit..");
+                    Console.WriteLine("Edit cancelled.");
                 }
                 else
                 {
                     emailAddresses[addressIndex] = newEmailAddress;
                     Console.WriteLine($"{oldEmailAddress} has been replaced with {newEmailAddress}.");
                 }
+            }
+        }
+
+        /// <summary>
+        /// Allows the user to delete an email address in the dataset.
+        /// </summary>
+        /// <param name="emailAddresses">List of email addresses.</param>
+        static void Remove(List<string> emailAddresses)
+        {
+            Console.WriteLine("Delete an entry by selecting either the entry or its index number.\nTo cancel press enter on the entry selection screen.");
+
+            int addressIndex = GetEmailAddressIndex(emailAddresses);
+
+            if(addressIndex == -1)
+            {
+                Console.WriteLine("Delete cancelled.");
+            }
+            else
+            {
+                string oldEmailAddress = emailAddresses[addressIndex];
+                emailAddresses.RemoveAt(addressIndex);
+
+                Console.WriteLine($"{oldEmailAddress} deleted.");
             }
         }
     }
